@@ -405,6 +405,15 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
         StandardMetrics.ms_v_env_cabintemp->SetValue(d[0] / 2.0 - 14);
         }
       break;
+    case 0x5a9:
+    {
+      uint16_t range = d[1] << 6 | d[2] >> 2;
+      if (range != 0x3fff)
+        {
+        StandardMetrics.ms_v_bat_range_est->SetValue(range / 20.0);
+        }
+      break;
+    }
     case 0x5bc:
     {
       uint16_t nl_gids = ((uint16_t) d[0] << 2) | ((d[1] & 0xc0) >> 6);
