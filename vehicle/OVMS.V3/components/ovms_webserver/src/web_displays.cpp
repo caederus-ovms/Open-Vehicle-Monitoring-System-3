@@ -505,3 +505,50 @@ void OvmsWebServer::HandleDashboard(PageEntry_t& p, PageContext_t& c)
     , cfg.gaugeset1.c_str());
   new HttpDataSender(c.nc, (const uint8_t*)content, strlen(content));
 }
+
+/**
+ * HandleRangeMap:
+ */
+void OvmsWebServer::HandleRangeMap(PageEntry_t& p, PageContext_t& c)
+{
+  c.head(200);
+  c.printf(
+    "  <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.3.4/dist/leaflet.css\" integrity=\"sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==\" crossorigin=\"\"/>\n"
+//    "  <script src=\"https://unpkg.com/leaflet@1.3.4/dist/leaflet.js\" integrity=\"sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==\" crossorigin=\"\"></script>\n"
+    "  <script src=\"https://unpkg.com/leaflet@1.3.4/dist/leaflet-src.js\" crossorigin=\"\"></script>\n"
+    "  <script src=\"https://ovms.caederus.org/js/rangemap.js\" onload=\"console.log('onload: range_load begin');range_load();console.log('onload: range_load end');\"></script>\n"
+  );
+
+  c.panel_start("primary panel-single", "Range Map");
+  c.printf(
+    "  <div id=\"mapid\" style=\"height: 700px;\">\n"
+    "    Range map appears here...\n"
+    "  </div>\n"
+  );
+  c.printf(
+    "  <script>\n"
+    "    var connection_type=\"%s\";\n"
+    "    var lat=%.4f;\n"
+    "    var lon=%.4f;\n"
+    "    var range_km=%.3g;\n"
+    "    var available_kwh=%.3g;\n"
+    "    if(range_load) {\n"
+    "        console.log(\"body: calling range_load()\");\n"
+    "        range_load();\n"
+    "    } else {\n"
+    "        console.log(\"body: not calling range_load() yet\");\n"
+    "    }\n"
+    "  </script>\n"
+    ,MyConfig.GetParamValue("vehicle","connection_type","").c_str()
+    ,StandardMetrics.ms_v_pos_latitude->AsFloat()
+    ,StandardMetrics.ms_v_pos_longitude->AsFloat()
+    ,StandardMetrics.ms_v_bat_range_ideal->AsFloat()
+    ,StandardMetrics.ms_v_bat_cac->AsFloat()
+  );
+  c.printf(
+    "  <input type=\"button\" value=\"Load\" onclick=\"range_load();\">\n"
+    "  <input type=\"button\" value=\"Update\" onclick=\"leaflet_update();\">\n"
+  );
+  c.panel_end();
+  c.done();
+}
