@@ -549,6 +549,22 @@ void OvmsWebServer::HandleRangeMap(PageEntry_t& p, PageContext_t& c)
     "  <input type=\"button\" value=\"Load\" onclick=\"range_load();\">\n"
     "  <input type=\"button\" value=\"Update\" onclick=\"leaflet_update();\">\n"
   );
+  c.print(
+    "  <div id=\"livestatus\" class=\"receiver\">"
+    "    lat=<span class=\"value\" data-metric=\"v.p.latitude\">?</span>"
+    "    lon=<span class=\"value\" data-metric=\"v.p.longitude\">?</span>"
+    "    range=<span class=\"value\" data-metric=\"v.b.range.ideal\">?</span>"
+    "    cac=<span class=\"value\" data-metric=\"v.b.cac\">?</span>"
+    "  </div>"
+    "  <script>"
+    "    $(\"#livestatus\").on(\"msg:metrics\", function(e, update){"
+    "      $(this).find(\"[data-metric]\").each(function(){"
+    "        $(this).text(metrics[$(this).data(\"metric\")]);"
+    "      });"
+    "      if(range_metrics_update) range_metrics_update(\"mapid\");\n"
+    "    }).trigger(\"msg:metrics\");"
+    "  </script>"
+  );
   c.panel_end();
   c.done();
 }
