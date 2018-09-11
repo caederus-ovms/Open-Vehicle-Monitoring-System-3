@@ -527,7 +527,8 @@ void OvmsWebServer::HandleRangeMap(PageEntry_t& p, PageContext_t& c)
   );
   c.printf(
     "  <script>\n"
-    "    var connection_type=\"%s\";\n"
+    "    var slow_connectors=\"%s\";\n"
+    "    var fast_connectors=\"%s\";\n"
     "    var lat=%.4f;\n"
     "    var lon=%.4f;\n"
     "    var range_km=%.3g;\n"
@@ -539,7 +540,8 @@ void OvmsWebServer::HandleRangeMap(PageEntry_t& p, PageContext_t& c)
     "        console.log(\"body: not calling range_load() yet\");\n"
     "    }\n"
     "  </script>\n"
-    ,MyConfig.GetParamValue("vehicle","connection_type","").c_str()
+    ,MyConfig.GetParamValue("vehicle","connectors.slow","").c_str()
+    ,MyConfig.GetParamValue("vehicle","connectors.fast","").c_str()
     ,StandardMetrics.ms_v_pos_latitude->AsFloat()
     ,StandardMetrics.ms_v_pos_longitude->AsFloat()
     ,StandardMetrics.ms_v_bat_range_ideal->AsFloat()
@@ -561,7 +563,7 @@ void OvmsWebServer::HandleRangeMap(PageEntry_t& p, PageContext_t& c)
     "      $(this).find(\"[data-metric]\").each(function(){"
     "        $(this).text(metrics[$(this).data(\"metric\")]);"
     "      });"
-    "      if(range_metrics_update) range_metrics_update(\"mapid\");\n"
+    "      if(range_metrics_update) range_metrics_update();\n"
     "    }).trigger(\"msg:metrics\");"
     "  </script>"
   );
