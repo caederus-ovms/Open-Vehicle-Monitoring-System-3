@@ -49,6 +49,7 @@ static const OvmsVehicle::poll_pid_t obdii_polls[] =
     { 0x79b, 0x7bb, VEHICLE_POLL_TYPE_OBDIIGROUP, 0x01, {  0, 61, 61 } }, // bat [39]
     { 0x79b, 0x7bb, VEHICLE_POLL_TYPE_OBDIIGROUP, 0x02, {  0, 67, 67 } }, // battery voltages [196]
     { 0x79b, 0x7bb, VEHICLE_POLL_TYPE_OBDIIGROUP, 0x04, {  0,307,307 } }, // battery temperatures [14]
+    { 0x79b, 0x7bb, VEHICLE_POLL_TYPE_OBDIIGROUP, 0x84, {  0,998,998 } }, // battery serial number [20]
     { 0, 0, 0x00, 0x00, { 0, 0, 0 } }
   };
 
@@ -88,6 +89,7 @@ OvmsVehicleNissanLeaf::OvmsVehicleNissanLeaf()
 
   m_soh_new_car = MyMetrics.InitFloat("xnl.v.b.soh.newcar", SM_STALE_HIGH, 0, Percentage);
   m_soh_instrument = MyMetrics.InitInt("xnl.v.b.soh.instrument", SM_STALE_HIGH, 0, Percentage);
+  m_bat_serial = MyMetrics.InitString("xnl.v.b.serial");
 
   RegisterCanBus(1,CAN_MODE_ACTIVE,CAN_SPEED_500KBPS);
   RegisterCanBus(2,CAN_MODE_ACTIVE,CAN_SPEED_500KBPS);
@@ -338,6 +340,16 @@ void OvmsVehicleNissanLeaf::PollReply_VIN(uint8_t reply_data[], uint16_t reply_l
   StandardMetrics.ms_v_vin->SetValue((char*)reply_data);
   }
 
+void OvmsVehicleNissanLeaf::PollReply_BatterySerial(uint8_t reply_data[], uint16_t reply_len)
+  {
+  if (reply_len != 20)
+    {
+    ESP_LOGI(TAG, "PollReply_BatterySerial: len=%d != 20", reply_len);
+    return;
+    }
+  m_bat_serial->SetValue((char*)reply_data);
+  }
+
 // Reassemble all pieces of a multi-frame reply.
 void OvmsVehicleNissanLeaf::IncomingPollReply(canbus* bus, uint16_t type, uint16_t pid, uint8_t* data, uint8_t length, uint16_t remain)
   {
@@ -374,6 +386,9 @@ void OvmsVehicleNissanLeaf::IncomingPollReply(canbus* bus, uint16_t type, uint16
         break;
       case 0x79a81: // VIN
         PollReply_VIN(buf, bufpos);
+        break;
+      case 0x7bb84: // battery serial
+        PollReply_BatterySerial(buf, bufpos);
         break;
       default:
         ESP_LOGI(TAG, "IncomingPollReply: unknown reply module|pid=%#x len=%d", id_pid, bufpos);

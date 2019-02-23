@@ -120,6 +120,7 @@ class OvmsVehicleNissanLeaf : public OvmsVehicle
     void PollReply_VIN(uint8_t reply_data[], uint16_t reply_len);
     void PollReply_BMS_Volt(uint8_t reply_data[], uint16_t reply_len);
     void PollReply_BMS_Temp(uint8_t reply_data[], uint16_t reply_len);
+    void PollReply_BatterySerial(uint8_t reply_data[], uint16_t reply_len);
 
     TimerHandle_t m_remoteCommandTimer;
     TimerHandle_t m_ccDisableTimer;
@@ -132,6 +133,7 @@ class OvmsVehicleNissanLeaf : public OvmsVehicle
     OvmsMetricVector<int> *m_bms_temp_int;
     OvmsMetricFloat *m_soh_new_car;
     OvmsMetricInt *m_soh_instrument;
+    OvmsMetricString *m_bat_serial;
   };
 
 #endif //#ifndef __VEHICLE_NISSANLEAF_H__
